@@ -55,7 +55,7 @@ var vulnVersions = map[string]string{
 func handleJar(path string, ra io.ReaderAt, sz int64) {
 	zr, err := zip.NewReader(ra, sz)
 	if err != nil {
-		fmt.Printf("cant't open JAR file: %s: %v\n", path, err)
+		fmt.Printf("cant't open JAR file: %s (size %d): %v\n", path, sz, err)
 		return
 	}
 	for _, file := range zr.File {
@@ -108,7 +108,16 @@ func main() {
 					return nil
 				}
 				defer f.Close()
-				handleJar(path, f, info.Size())
+				sz, err := f.Seek(0, os.SEEK_END)
+				if err != nil {
+					fmt.Printf("can't seek in %s: %v", path, err)
+					return nil
+				}
+				if _, err := f.Seek(0, os.SEEK_END); err != nil {
+					fmt.Printf("can't seek in %s: %v", path, err)
+					return nil
+				}
+				handleJar(path, f, sz)
 			default:
 				return nil
 			}
