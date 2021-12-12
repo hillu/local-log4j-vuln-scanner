@@ -67,15 +67,15 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 				continue
 			}
 			hasher := sha256.New()
-			if _, err := io.Copy(hasher, fr); err != nil {
-				fmt.Printf("can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
-			} else {
-				sum := hex.EncodeToString(hasher.Sum(nil))
-				if desc, ok := vulnVersions[sum]; ok {
-					fmt.Printf("indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
-				}
-			}
+			_, err = io.Copy(hasher, fr)
 			fr.Close()
+			if err != nil {
+				fmt.Printf("can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
+			}
+			sum := hex.EncodeToString(hasher.Sum(nil))
+			if desc, ok := vulnVersions[sum]; ok {
+				fmt.Printf("indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
+			}
 		case ".jar", ".war":
 			fr, err := file.Open()
 			if err != nil {
