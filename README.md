@@ -20,6 +20,16 @@ Linux distributions may not be recognized.
 $ ./log4j-vuln-scanner /path/to/app1 /path/to/app2 …
 ```
 
+If class files indicating one of the vulnerabilities are found,
+messages like the following are printed to standard output:
+``` console
+./local-log4j-vuln-scanner - a simple local log4j vulnerability scanner
+
+indicator for vulnerable component found in /path/to/vuln/log4shell-vulnerable-app-0.0.1-SNAPSHOT.war::WEB-INF/lib/log4j-core-2.14.1.jar (org/apache/logging/log4j/core/net/JndiManager$JndiManagerFactory.class): log4j 2.14.0-2.14.1
+indicator for vulnerable component found in /path/to/vuln/log4shell-vulnerable-app-0.0.1-SNAPSHOT.war::WEB-INF/lib/log4j-core-2.14.1.jar (org/apache/logging/log4j/core/net/JndiManager.class): log4j 2.14.0-2.14.1
+Scan finished
+```
+
 # License
 
 GNU General Public License, version 3
