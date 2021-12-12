@@ -32,7 +32,6 @@ var vulnVersions = map[string]string{
 	"764b06686dbe06e3d5f6d15891250ab04073a0d1c357d114b7365c70fa8a7407": "log4j 2.8.2",         // JndiManager.class
 	"77323460255818f4cbfe180141d6001bfb575b429e00a07cbceabd59adf334d6": "log4j 2.14.0-2.14.1", // JndiManager.class
 	"8abaebc4d09926cd12b5269c781b64a7f5a57793c54dc1225976f02ba58343bf": "log4j 2.13.0-2.13.3", // JndiManager$JndiManagerFactory.class
-	"914a64f23e2bcc1ae166af645a21f71f18ad6be8282001ec10b3e45b37064c99": "log4j 2.13.0-2.15.0", // JndiManager$1.class
 	"91e58af100aface711700562b5002c5d397fb35d2a95d5704db41461ac1ad8fd": "log4j 2.1-2.3",       // JndiManager$JndiManagerFactory.class
 	"ae950f9435c0ef3373d4030e7eff175ee11044e584b7f205b7a9804bbe795f9c": "log4j 2.1-2.3",       // JndiManager.class
 	"aec7ea2daee4d6468db2df25597594957a06b945bcb778bbcd5acc46f17de665": "log4j 2.4-2.6.2",     // JndiManager$JndiManagerFactory.class
