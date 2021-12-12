@@ -30,7 +30,6 @@ var vulnVersions = map[string]string{
 	"764b06686dbe06e3d5f6d15891250ab04073a0d1c357d114b7365c70fa8a7407": "log4j 2.8.2",         // JndiManager.class
 	"77323460255818f4cbfe180141d6001bfb575b429e00a07cbceabd59adf334d6": "log4j 2.14.0-2.14.1", // JndiManager.class
 	"8abaebc4d09926cd12b5269c781b64a7f5a57793c54dc1225976f02ba58343bf": "log4j 2.13.0-2.13.3", // JndiManager$JndiManagerFactory.class
-	"914a64f23e2bcc1ae166af645a21f71f18ad6be8282001ec10b3e45b37064c99": "log4j 2.13.0-2.15.0", // JndiManager$1.class
 	"91e58af100aface711700562b5002c5d397fb35d2a95d5704db41461ac1ad8fd": "log4j 2.1-2.3",       // JndiManager$JndiManagerFactory.class
 	"ae950f9435c0ef3373d4030e7eff175ee11044e584b7f205b7a9804bbe795f9c": "log4j 2.1-2.3",       // JndiManager.class
 	"aec7ea2daee4d6468db2df25597594957a06b945bcb778bbcd5acc46f17de665": "log4j 2.4-2.6.2",     // JndiManager$JndiManagerFactory.class
@@ -38,6 +37,23 @@ var vulnVersions = map[string]string{
 	"c3e95da6542945c1a096b308bf65bbd7fcb96e3d201e5a2257d85d4dedc6a078": "log4j 2.13.0-2.13.3", // JndiManager.class
 	"e4906e06c4e7688b468524990d9bb6460d6ef31fe938e01561f3f93ab5ca25a6": "log4j 2.8.2-2.12.0",  // JndiManager$1.class
 	"fe15a68ef8a75a3f9d3f5843f4b4a6db62d1145ef72937ed7d6d1bbcf8ec218f": "log4j 2.12.0-2.12.1", // JndiManager$JndiManagerFactory.class
+	"0ebc263ba66a7452d3dfc15760c560f930d835164914a1340d741838e3165dbb": "log4j 2.4-2.5",       //MessagePatternConverter.class
+	"52b5574bad677030c56c1a386362840064d347523e61e59ca1c55faf7e998986": "log4j 2.12",          //MessagePatternConverter.class
+	"5c328eedefcb28512ff5d9a7556741dd159f0b13e1c0c52edc958d9821b8d2c5": "log4j 2.6",           //MessagePatternConverter.class
+	"791a12347e62d9884c4d6f8e285098fedaf3bcdf591af3e4449923191588d43c": "log4j 2.8-2.9",       //MessagePatternConverter.class
+	"8d5e886175b66ec2de5b61113fdaf06c50e1070cad1fb9150258e01d84d13c4b": "log4j 2.13",          //MessagePatternConverter.class
+	"95b385ebc65843315aeae33551e7bbdad886e9e9465ea8d3179cd74344b37984": "log4j 2.10-2.11",     //MessagePatternConverter.class
+	"a36c2e78cef7c2ddcc4ebbb11c085e85989eb93f9d19bd6254913b13dfe7c58e": "log4j 2.0-2.3",       //MessagePatternConverter.class
+	"a3a65f2c5bc0dd62df115a0d9ac7140793c61b65bbbac313a526a3b50724a8c7": "log4j 2.8.2",         //MessagePatternConverter.class
+	"ee41ae7ae80f5c533548a89c6d6e112df609c838b901daea99ac88ccda2a5da1": "log4j 2.7",           //MessagePatternConverter.class
+	"f0a869f7da9b17d0a23d0cb0e13c65afa5e42e9567b47603a8fc0debc7ef193c": "log4j 2.14",          //MessagePatternConverter.class
+	"f8baca973f1874b76cfaed0f4c17048b1ac0dee364abfdfeeec62de3427def50": "log4j 2.0-rc1",       //MessagePatternConverter.class
+
+	"ce69c1ea49c60f3be90cb9c86d7220af86e5d2fbc08fd7232da7278926e4f881": "log4j 2.0-alpha1/alpha2/beta1", //MessagePatternConverter.class
+	"963ee03ebe020703fea27f657496d35edeac264beebeb14bfcd9d3350343c0bf": "log4j 2.0-beta2/beta3",         //MessagePatternConverter.class
+	"be8f32ed92f161df72248dcbaaf761c812ddbb59434abfd5c87482e9e0bd983c": "log4j 2.0-beta4",               //MessagePatternConverter.class
+	"9a54a585ed491573e80e0b32e964e5eb4d6c4068d2abffff628e3c69ef9102cf": "log4j 2.0-beta5",               //MessagePatternConverter.class
+	"357120b06f61475033d152505c3d43a57c9a9bdc05b835d0939f1662b48fc6c3": "log4j 2.0-beta6/beta7/beta8",   //MessagePatternConverter.class
 
 	"6adb3617902180bdf9cbcfc08b5a11f3fac2b44ef1828131296ac41397435e3d": "log4j 1.2.4",         // SocketNode.class
 	"3ef93e9cb937295175b75182e42ba9a0aa94f9f8e295236c9eef914348efeef0": "log4j 1.2.6-1.2.9",   // SocketNode.class
