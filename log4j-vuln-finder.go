@@ -2,10 +2,12 @@ package main
 
 import (
 	"archive/zip"
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -51,8 +53,8 @@ var vulnVersions = map[string]string{
 	"fbda3cfc5853ab4744b853398f2b3580505f5a7d67bfb200716ef6ae5be3c8b7": "log4j 1.2.13-1.2.14", // SocketNode.class
 }
 
-func handleJar(path string) {
-	zr, err := zip.OpenReader(path)
+func handleJar(path string, ra io.ReaderAt, sz int64) {
+	zr, err := zip.NewReader(ra, sz)
 	if err != nil {
 		fmt.Printf("cant't open JAR file: %s: %v\n", path, err)
 		return
@@ -75,6 +77,18 @@ func handleJar(path string) {
 				}
 			}
 			fr.Close()
+		case ".jar", ".war":
+			fr, err := file.Open()
+			if err != nil {
+				fmt.Printf("can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
+				continue
+			}
+			buf, err := ioutil.ReadAll(fr)
+			fr.Close()
+			if err != nil {
+				fmt.Printf("can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
+			}
+			handleJar(path+"::"+file.Name, bytes.NewReader(buf), int64(len(buf)))
 		}
 	}
 }
@@ -89,7 +103,13 @@ func main() {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 			switch ext := strings.ToLower(filepath.Ext(path)); ext {
 			case ".jar", ".war":
-				handleJar(path)
+				f, err := os.Open(path)
+				if err != nil {
+					fmt.Printf("can't open %s: %v", path, err)
+					return nil
+				}
+				defer f.Close()
+				handleJar(path, f, info.Size())
 			default:
 				return nil
 			}
