@@ -15,7 +15,7 @@ jobs:
 
     - name: Build
       run: |
-        export GOFLAGS="-trimpath"
+        export GOFLAGS="-buildmode=pie -trimpath"
         go version
         go build .
         GOOS=windows go build .
