@@ -14,6 +14,11 @@ This tool currently checks for known build artifacts that have been
 obtained through Maven. From-source rebuilds as they are done for
 Linux distributions may not be recognized.
 
+Binaries for x86_64 Windoes, Linux, MacOSX for tagged releases are
+provided via the
+[Releases](https://github.com/hillu/local-log4j-vuln-scanner/releases)
+page.
+
 # Usage
 
 ``` console
@@ -29,6 +34,11 @@ indicator for vulnerable component found in /path/to/vuln/log4shell-vulnerable-a
 indicator for vulnerable component found in /path/to/vuln/log4shell-vulnerable-app-0.0.1-SNAPSHOT.war::WEB-INF/lib/log4j-core-2.14.1.jar (org/apache/logging/log4j/core/net/JndiManager.class): log4j 2.14.0-2.14.1
 Scan finished
 ```
+
+# Building from source
+
+Install a [Go compiler](https://golang.org/dl) and just run `go build`
+in the checked out repository.
 
 # License
 
