@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -109,14 +110,42 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 	}
 }
 
+type excludeFlags []string
+
+func (flags *excludeFlags) String() string {
+	return fmt.Sprint(*flags)
+}
+
+func (flags *excludeFlags) Set(value string) error {
+	*flags = append(*flags, value)
+	return nil
+}
+
+func (flags excludeFlags) Has(path string) bool {
+	for _, exclude := range flags {
+		if path == exclude {
+			return true
+		}
+	}
+	return false
+}
+
+var excludes excludeFlags
+
 func main() {
+	flag.Var(&excludes, "exclude", "paths to exclude")
+	flag.Parse()
+
 	fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", os.Args[0])
 	if len(os.Args) < 2 {
 		fmt.Printf("Usage: %s [ paths ... ]\n", os.Args[0])
 		os.Exit(1)
 	}
-	for _, root := range os.Args[1:] {
+	for _, root := range flag.Args() {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+			if excludes.Has(path) {
+				return filepath.SkipDir
+			}
 			if info.IsDir() {
 				return nil
 			}
