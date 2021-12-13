@@ -145,7 +145,7 @@ func main() {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				fmt.Printf("%s: %s\n", path, err)
-				return err
+				return nil
 			}
 			if excludes.Has(path) {
 				return filepath.SkipDir
