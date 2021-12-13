@@ -110,13 +110,17 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 }
 
 func main() {
-	fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", os.Args[0])
+	fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", filepath.Base(os.Args[0]))
 	if len(os.Args) < 2 {
 		fmt.Printf("Usage: %s [ paths ... ]\n", os.Args[0])
 		os.Exit(1)
 	}
 	for _, root := range os.Args[1:] {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				fmt.Printf("%s: %s\n", path, err)
+				return err
+			}
 			if info.IsDir() {
 				return nil
 			}
@@ -144,5 +148,5 @@ func main() {
 			return nil
 		})
 	}
-	fmt.Println("Scan finished")
+	fmt.Println("\nScan finished")
 }
