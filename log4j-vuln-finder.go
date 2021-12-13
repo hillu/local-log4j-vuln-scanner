@@ -67,6 +67,7 @@ var vulnVersions = map[string]string{
 	"ed5d53deb29f737808521dd6284c2d7a873a59140e702295a80bd0f26988f53a": "log4j 1.2.5",         // SocketNode.class
 	"f3b815a2b3c74851ff1b94e414c36f576fbcdf52b82b805b2e18322b3f5fc27c": "log4j 1.2.12",        // SocketNode.class
 	"fbda3cfc5853ab4744b853398f2b3580505f5a7d67bfb200716ef6ae5be3c8b7": "log4j 1.2.13-1.2.14", // SocketNode.class
+	"287c1d40f2a4bc0055b32b45f12f01bdc2a27379ec33fe13a084bf69a1f4c6e1": "log4j 1.2.15.v201012070815",// SocketNode.class
 }
 
 func handleJar(path string, ra io.ReaderAt, sz int64) {
