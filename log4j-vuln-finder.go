@@ -117,6 +117,9 @@ func main() {
 	}
 	for _, root := range os.Args[1:] {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+			if info.IsDir() {
+				return nil
+			}
 			switch ext := strings.ToLower(filepath.Ext(path)); ext {
 			case ".jar", ".war", ".ear":
 				f, err := os.Open(path)
