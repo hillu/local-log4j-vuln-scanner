@@ -15,9 +15,20 @@ jobs:
 
     - name: Build
       run: |
+        go version
         go build .
         GOOS=windows go build .
         GOOS=darwin go build -o local-log4j-vuln-scanner.macosx .
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      if: startsWith(github.ref, 'refs/heads/')
+      with:
+        name: my-artifact
+        path: |
+          local-log4j-vuln-scanner
+          local-log4j-vuln-scanner.exe
+          local-log4j-vuln-scanner.macosx
 
     - name: Release
       uses: softprops/action-gh-release@v1
