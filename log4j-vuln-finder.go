@@ -71,6 +71,9 @@ var vulnVersions = map[string]string{
 }
 
 func handleJar(path string, ra io.ReaderAt, sz int64) {
+	if verbose {
+		fmt.Printf("Inspecting %s...\n", path)
+	}
 	zr, err := zip.NewReader(ra, sz)
 	if err != nil {
 		fmt.Printf("cant't open JAR file: %s (size %d): %v\n", path, sz, err)
@@ -131,9 +134,11 @@ func (flags excludeFlags) Has(path string) bool {
 }
 
 var excludes excludeFlags
+var verbose bool
 
 func main() {
 	flag.Var(&excludes, "exclude", "paths to exclude")
+	flag.BoolVar(&verbose, "verbose", false, "log every archive file considered")
 	flag.Parse()
 
 	fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", filepath.Base(os.Args[0]))
