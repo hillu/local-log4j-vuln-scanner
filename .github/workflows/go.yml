@@ -17,6 +17,7 @@ jobs:
       run: |
         go build .
         GOOS=windows go build .
+        GOOS=darwin go build -o local-log4j-vuln-scanner.macosx .
 
     - name: Release
       uses: softprops/action-gh-release@v1
@@ -25,5 +26,6 @@ jobs:
         files: |
           local-log4j-vuln-scanner
           local-log4j-vuln-scanner.exe
+          local-log4j-vuln-scanner.macosx
           README.md
           LICENSE
