@@ -93,7 +93,7 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 			if desc, ok := vulnVersions[sum]; ok {
 				fmt.Printf("indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
 			}
-		case ".jar", ".war":
+		case ".jar", ".war", ".ear":
 			fr, err := file.Open()
 			if err != nil {
 				fmt.Printf("can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
