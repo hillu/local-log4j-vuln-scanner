@@ -15,6 +15,7 @@ jobs:
 
     - name: Build
       run: |
+        export GOFLAGS="-trimpath"
         go version
         go build .
         GOOS=windows go build .
