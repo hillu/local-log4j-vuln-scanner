@@ -57,7 +57,9 @@ var vulnVersions = map[string]string{
 	"be8f32ed92f161df72248dcbaaf761c812ddbb59434abfd5c87482e9e0bd983c": "log4j 2.0-beta4",               // MessagePatternConverter.class
 	"9a54a585ed491573e80e0b32e964e5eb4d6c4068d2abffff628e3c69ef9102cf": "log4j 2.0-beta5",               // MessagePatternConverter.class
 	"357120b06f61475033d152505c3d43a57c9a9bdc05b835d0939f1662b48fc6c3": "log4j 2.0-beta6/beta7/beta8",   // MessagePatternConverter.class
+}
 
+var vulnVersions_v1 = map[string]string{
 	"6adb3617902180bdf9cbcfc08b5a11f3fac2b44ef1828131296ac41397435e3d": "log4j 1.2.4",         // SocketNode.class
 	"3ef93e9cb937295175b75182e42ba9a0aa94f9f8e295236c9eef914348efeef0": "log4j 1.2.6-1.2.9",   // SocketNode.class
 	"bee4a5a70843a981e47207b476f1e705c21fc90cb70e95c3b40d04a2191f33e9": "log4j 1.2.8",         // SocketNode.class
@@ -97,6 +99,12 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 			if desc, ok := vulnVersions[sum]; ok {
 				fmt.Printf("indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
 				continue
+			}
+			if ignore_v1 != true {
+				if desc, ok := vulnVersions_v1[sum]; ok {
+					fmt.Printf("indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
+					continue
+				}
 			}
 			if strings.ToLower(filepath.Base(file.Name)) == "jndimanager.class" {
 				buf := make([]byte, sz)
@@ -147,15 +155,22 @@ func (flags excludeFlags) Has(path string) bool {
 
 var excludes excludeFlags
 var verbose bool
+var quiet bool
+var ignore_v1 bool
 
 func main() {
 	flag.Var(&excludes, "exclude", "paths to exclude")
 	flag.BoolVar(&verbose, "verbose", false, "log every archive file considered")
+	flag.BoolVar(&quiet, "quiet", false, "no ouput unless vulnerable")
+	flag.BoolVar(&ignore_v1, "v1", false, "ignore log4j 1.x versions")
 	flag.Parse()
 
-	fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", filepath.Base(os.Args[0]))
+	if !quiet {
+		fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", filepath.Base(os.Args[0]))
+	}
+
 	if len(os.Args) < 2 {
-		fmt.Printf("Usage: %s [ paths ... ]\n", os.Args[0])
+		fmt.Printf("Usage: %s [--verbose] [--quiet] [--v1] [--exclude path] [ paths ... ]\n", os.Args[0])
 		os.Exit(1)
 	}
 	for _, root := range flag.Args() {
@@ -194,5 +209,8 @@ func main() {
 			return nil
 		})
 	}
-	fmt.Println("\nScan finished")
+
+	if !quiet {
+		fmt.Println("\nScan finished")
+	}
 }

@@ -22,8 +22,15 @@ page.
 # Usage
 
 ``` console
-$ ./log4j-vuln-scanner [--exclude /path/to/exclude …] /path/to/app1 /path/to/app2 …
+$ ./log4j-vuln-scanner [--verbose] [--v1] [--exclude /path/to/exclude …] /path/to/app1 /path/to/app2 …
 ```
+
+The `--verbose` flag will show every .jar and .war file checked, even if no problem is found.
+
+The `--quiet` flag will supress output except for indicators of a known vulnerability.
+
+The `--v1` flag will _exclude_ checks for older log4j 1.x vulnerabilities.
+
 
 If class files indicating one of the vulnerabilities are found,
 messages like the following are printed to standard output:
