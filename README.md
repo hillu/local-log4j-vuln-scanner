@@ -17,7 +17,7 @@ Linux distributions may not be recognized.
 # Usage
 
 ``` console
-$ ./log4j-vuln-scanner /path/to/app1 /path/to/app2 …
+$ ./log4j-vuln-scanner [--exclude /path/to/exclude …] /path/to/app1 /path/to/app2 …
 ```
 
 If class files indicating one of the vulnerabilities are found,
