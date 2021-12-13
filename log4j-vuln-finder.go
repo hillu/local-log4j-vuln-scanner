@@ -96,6 +96,18 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 			sum := hex.EncodeToString(hasher.Sum(nil))
 			if desc, ok := vulnVersions[sum]; ok {
 				fmt.Printf("indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
+				continue
+			}
+			if strings.ToLower(filepath.Base(file.Name)) == "jndimanager.class" {
+				buf := make([]byte, sz)
+				if _, err := ra.ReadAt(buf, 0); err != nil {
+					fmt.Printf("can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
+					continue
+				}
+				if !bytes.Contains(buf, []byte("Invalid JNDI URI - {}")) {
+					fmt.Printf("indicator for vulnerable component found in %s (%s): %s\n",
+						path, file.Name, "JndiManager class missing new error message string literal")
+				}
 			}
 		case ".jar", ".war", ".ear":
 			fr, err := file.Open()
