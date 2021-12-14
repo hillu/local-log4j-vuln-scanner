@@ -17,10 +17,19 @@ jobs:
       run: |
         export GOFLAGS="-buildmode=pie -trimpath"
         go version
-        go build .
-        GOOS=windows go build .
-        GOOS=darwin go build -o local-log4j-vuln-scanner.macosx .
-        sha256sum local-log4j-vuln-scanner.exe local-log4j-vuln-scanner.macosx local-log4j-vuln-scanner \
+        go build              -o local-log4j-vuln-scanner        ./scanner
+        GOOS=windows go build -o local-log4j-vuln-scanner.exe    ./scanner
+        GOOS=darwin go build  -o local-log4j-vuln-scanner.macosx ./scanner
+        go build              -o local-log4j-vuln-patcher        ./patcher
+        GOOS=windows go build -o local-log4j-vuln-patcher.exe    ./patcher
+        GOOS=darwin go build  -o local-log4j-vuln-patcher.macosx ./patcher
+        sha256sum \
+            local-log4j-vuln-scanner \
+            local-log4j-vuln-scanner.exe \
+            local-log4j-vuln-scanner.macosx \
+            local-log4j-vuln-patcher \
+            local-log4j-vuln-patcher.exe \
+            local-log4j-vuln-patcher.macosx \
         | awk 'BEGIN { print "# Binaries" } /^([0-9a-f]*)  (.*)$/ { print "- "$2": sha256="$1 }' \
         > relnotes.txt
 
@@ -33,6 +42,9 @@ jobs:
           local-log4j-vuln-scanner
           local-log4j-vuln-scanner.exe
           local-log4j-vuln-scanner.macosx
+          local-log4j-vuln-patcher
+          local-log4j-vuln-patcher.exe
+          local-log4j-vuln-patcher.macosx
           relnotes.txt
 
     - name: Release
@@ -44,5 +56,8 @@ jobs:
           local-log4j-vuln-scanner
           local-log4j-vuln-scanner.exe
           local-log4j-vuln-scanner.macosx
+          local-log4j-vuln-patcher
+          local-log4j-vuln-patcher.exe
+          local-log4j-vuln-patcher.macosx
           README.md
           LICENSE

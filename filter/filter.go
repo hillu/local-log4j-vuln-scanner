@@ -1,18 +1,36 @@
-package main
+package filter
 
 import (
-	"archive/zip"
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
-	"flag"
-	"fmt"
 	"io"
-	"io/ioutil"
-	"os"
 	"path/filepath"
 	"strings"
 )
+
+func IsVulnerableClass(buf []byte, filename string, examineV1 bool) string {
+	hasher := sha256.New()
+	io.Copy(hasher, bytes.NewBuffer(buf))
+	sum := hex.EncodeToString(hasher.Sum(nil))
+
+	if desc, ok := vulnVersions[sum]; ok {
+		return desc
+	}
+
+	if examineV1 {
+		if desc, ok := vulnVersionsV1[sum]; ok {
+			return desc
+		}
+	}
+
+	if strings.ToLower(filepath.Base(filename)) == "jndimanager.class" &&
+		!bytes.Contains(buf, []byte("Invalid JNDI URI - {}")) {
+		return "JndiManager class missing new error message string literal"
+	}
+
+	return ""
+}
 
 var vulnVersions = map[string]string{
 	"39a495034d37c7934b64a9aa686ea06b61df21aa222044cc50a47d6903ba1ca8": "log4j 2.0-rc1",       // JndiLookup.class
@@ -59,7 +77,7 @@ var vulnVersions = map[string]string{
 	"357120b06f61475033d152505c3d43a57c9a9bdc05b835d0939f1662b48fc6c3": "log4j 2.0-beta6/beta7/beta8",   // MessagePatternConverter.class
 }
 
-var vulnVersions_v1 = map[string]string{
+var vulnVersionsV1 = map[string]string{
 	"6adb3617902180bdf9cbcfc08b5a11f3fac2b44ef1828131296ac41397435e3d": "log4j 1.2.4",                // SocketNode.class
 	"3ef93e9cb937295175b75182e42ba9a0aa94f9f8e295236c9eef914348efeef0": "log4j 1.2.6-1.2.9",          // SocketNode.class
 	"bee4a5a70843a981e47207b476f1e705c21fc90cb70e95c3b40d04a2191f33e9": "log4j 1.2.8",                // SocketNode.class
@@ -71,164 +89,4 @@ var vulnVersions_v1 = map[string]string{
 	"f3b815a2b3c74851ff1b94e414c36f576fbcdf52b82b805b2e18322b3f5fc27c": "log4j 1.2.12",               // SocketNode.class
 	"fbda3cfc5853ab4744b853398f2b3580505f5a7d67bfb200716ef6ae5be3c8b7": "log4j 1.2.13-1.2.14",        // SocketNode.class
 	"287c1d40f2a4bc0055b32b45f12f01bdc2a27379ec33fe13a084bf69a1f4c6e1": "log4j 1.2.15.v201012070815", // SocketNode.class
-}
-
-var logFile = os.Stdout
-var errFile = os.Stderr
-
-func handleJar(path string, ra io.ReaderAt, sz int64) {
-	if verbose {
-		fmt.Fprintf(logFile, "Inspecting %s...\n", path)
-	}
-	zr, err := zip.NewReader(ra, sz)
-	if err != nil {
-		fmt.Fprintf(logFile, "cant't open JAR file: %s (size %d): %v\n", path, sz, err)
-		return
-	}
-	for _, file := range zr.File {
-		switch strings.ToLower(filepath.Ext(file.Name)) {
-		case ".class":
-			fr, err := file.Open()
-			if err != nil {
-				fmt.Fprintf(logFile, "can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
-				continue
-			}
-			hasher := sha256.New()
-			_, err = io.Copy(hasher, fr)
-			fr.Close()
-			if err != nil {
-				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
-			}
-			sum := hex.EncodeToString(hasher.Sum(nil))
-			if desc, ok := vulnVersions[sum]; ok {
-				fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
-				continue
-			}
-			if ignore_v1 != true {
-				if desc, ok := vulnVersions_v1[sum]; ok {
-					fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
-					continue
-				}
-			}
-			if strings.ToLower(filepath.Base(file.Name)) == "jndimanager.class" {
-				buf := make([]byte, sz)
-				if _, err := ra.ReadAt(buf, 0); err != nil {
-					fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
-					continue
-				}
-				if !bytes.Contains(buf, []byte("Invalid JNDI URI - {}")) {
-					fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n",
-						path, file.Name, "JndiManager class missing new error message string literal")
-				}
-			}
-		case ".jar", ".war", ".ear":
-			fr, err := file.Open()
-			if err != nil {
-				fmt.Fprintf(logFile, "can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
-				continue
-			}
-			buf, err := ioutil.ReadAll(fr)
-			fr.Close()
-			if err != nil {
-				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
-			}
-			handleJar(path+"::"+file.Name, bytes.NewReader(buf), int64(len(buf)))
-		}
-	}
-}
-
-type excludeFlags []string
-
-func (flags *excludeFlags) String() string {
-	return fmt.Sprint(*flags)
-}
-
-func (flags *excludeFlags) Set(value string) error {
-	*flags = append(*flags, value)
-	return nil
-}
-
-func (flags excludeFlags) Has(path string) bool {
-	for _, exclude := range flags {
-		if path == exclude {
-			return true
-		}
-	}
-	return false
-}
-
-var excludes excludeFlags
-var verbose bool
-var logFileName string
-var quiet bool
-var ignore_v1 bool
-
-func main() {
-	flag.Var(&excludes, "exclude", "paths to exclude")
-	flag.BoolVar(&verbose, "verbose", false, "log every archive file considered")
-	flag.StringVar(&logFileName, "log", "", "log file to write output to")
-	flag.BoolVar(&quiet, "quiet", false, "no ouput unless vulnerable")
-	flag.BoolVar(&ignore_v1, "ignore-v1", false, "ignore log4j 1.x versions")
-	flag.Parse()
-
-	if !quiet {
-		fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", filepath.Base(os.Args[0]))
-	}
-
-	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "Usage: %s [--verbose] [--quiet] [--ignore-v1] [--exclude path] [ paths ... ]\n", os.Args[0])
-		os.Exit(1)
-	}
-
-	if logFileName != "" {
-		f, err := os.Create(logFileName)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Could not create log file")
-			os.Exit(2)
-		}
-		logFile = f
-		errFile = f
-		defer f.Close()
-	}
-
-	for _, root := range flag.Args() {
-		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				fmt.Fprintf(errFile, "%s: %s\n", path, err)
-				return nil
-			}
-			if excludes.Has(path) {
-				return filepath.SkipDir
-			}
-			if info.IsDir() {
-				return nil
-			}
-			switch ext := strings.ToLower(filepath.Ext(path)); ext {
-			case ".jar", ".war", ".ear":
-				f, err := os.Open(path)
-				if err != nil {
-					fmt.Fprintf(errFile, "can't open %s: %v", path, err)
-					return nil
-				}
-				defer f.Close()
-				sz, err := f.Seek(0, os.SEEK_END)
-				if err != nil {
-					fmt.Fprintf(errFile, "can't seek in %s: %v", path, err)
-					return nil
-				}
-				if _, err := f.Seek(0, os.SEEK_END); err != nil {
-					fmt.Fprintf(errFile, "can't seek in %s: %v", path, err)
-					return nil
-				}
-				handleJar(path, f, sz)
-			default:
-				return nil
-			}
-			return nil
-		})
-	}
-
-	if !quiet {
-		fmt.Println("\nScan finished")
-	}
 }
