@@ -20,7 +20,9 @@ jobs:
         go build .
         GOOS=windows go build .
         GOOS=darwin go build -o local-log4j-vuln-scanner.macosx .
-        sha256sum local-log4j-vuln-scanner.exe local-log4j-vuln-scanner.macosx local-log4j-vuln-scanner
+        sha256sum local-log4j-vuln-scanner.exe local-log4j-vuln-scanner.macosx local-log4j-vuln-scanner \
+        | awk 'BEGIN { print "# Binaries" } /^([0-9a-f]*)  (.*)$/ { print "- ["$2"]("$2") sha="$1 }' \
+        > relnotes.txt
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
@@ -31,11 +33,13 @@ jobs:
           local-log4j-vuln-scanner
           local-log4j-vuln-scanner.exe
           local-log4j-vuln-scanner.macosx
+          relnotes.txt
 
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
+        body_path: relnotes.txt
         files: |
           local-log4j-vuln-scanner
           local-log4j-vuln-scanner.exe
