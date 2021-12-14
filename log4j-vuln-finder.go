@@ -156,13 +156,13 @@ func main() {
 
 	fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", filepath.Base(os.Args[0]))
 	if len(os.Args) < 2 {
-		fmt.Printf("Usage: %s [ paths ... ]\n", os.Args[0])
+		fmt.Fprintln(os.Stderr,"Usage: %s [ paths ... ]\n", os.Args[0])
 		os.Exit(1)
 	}
 	for _, root := range flag.Args() {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				fmt.Printf("%s: %s\n", path, err)
+				fmt.Fprintln(os.Stderr,"%s: %s\n", path, err)
 				return nil
 			}
 			if excludes.Has(path) {
@@ -175,17 +175,17 @@ func main() {
 			case ".jar", ".war", ".ear":
 				f, err := os.Open(path)
 				if err != nil {
-					fmt.Printf("can't open %s: %v", path, err)
+					fmt.Fprintln(os.Stderr,"can't open %s: %v", path, err)
 					return nil
 				}
 				defer f.Close()
 				sz, err := f.Seek(0, os.SEEK_END)
 				if err != nil {
-					fmt.Printf("can't seek in %s: %v", path, err)
+					fmt.Fprintln(os.Stderr,"can't seek in %s: %v", path, err)
 					return nil
 				}
 				if _, err := f.Seek(0, os.SEEK_END); err != nil {
-					fmt.Printf("can't seek in %s: %v", path, err)
+					fmt.Fprintln(os.Stderr,"can't seek in %s: %v", path, err)
 					return nil
 				}
 				handleJar(path, f, sz)
