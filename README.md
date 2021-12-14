@@ -17,7 +17,7 @@ Linux distributions may not be recognized.
 Also included is a simple patch tool that can be used to patch out bad
 classes from JAR files by rewriting the ZIP archive structure.
 
-Binaries for x86_64 Windoes, Linux, MacOSX for tagged releases are
+Binaries for x86_64 Windows, Linux, MacOSX for tagged releases are
 provided via the
 [Releases](https://github.com/hillu/local-log4j-vuln-scanner/releases)
 page.
