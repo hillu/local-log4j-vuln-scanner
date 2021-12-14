@@ -36,7 +36,7 @@ The `--ignore-v1` flag will _exclude_ checks for log4j 1.x vulnerabilities.
 
 The `--log` flag allows everythig to be written to a log file instead of stdout/stderr.
 
-Use the `--exclude` flag to exclude subdirectories from being scanned.
+Use the `--exclude` flag to exclude subdirectories from being scanned. Can be used multiple times.
 
 If class files indicating one of the vulnerabilities are found,
 messages like the following are printed to standard output:
