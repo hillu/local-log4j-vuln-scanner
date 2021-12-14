@@ -71,13 +71,15 @@ var vulnVersions = map[string]string{
 	"287c1d40f2a4bc0055b32b45f12f01bdc2a27379ec33fe13a084bf69a1f4c6e1": "log4j 1.2.15.v201012070815", // SocketNode.class
 }
 
+var logFile = os.Stdout
+
 func handleJar(path string, ra io.ReaderAt, sz int64) {
 	if verbose {
-		fmt.Printf("Inspecting %s...\n", path)
+		fmt.Fprintf(logFile, "Inspecting %s...\n", path)
 	}
 	zr, err := zip.NewReader(ra, sz)
 	if err != nil {
-		fmt.Printf("cant't open JAR file: %s (size %d): %v\n", path, sz, err)
+		fmt.Fprintf(logFile, "cant't open JAR file: %s (size %d): %v\n", path, sz, err)
 		return
 	}
 	for _, file := range zr.File {
@@ -85,41 +87,41 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 		case ".class":
 			fr, err := file.Open()
 			if err != nil {
-				fmt.Printf("can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
+				fmt.Fprintf(logFile, "can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
 				continue
 			}
 			hasher := sha256.New()
 			_, err = io.Copy(hasher, fr)
 			fr.Close()
 			if err != nil {
-				fmt.Printf("can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
+				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
 			}
 			sum := hex.EncodeToString(hasher.Sum(nil))
 			if desc, ok := vulnVersions[sum]; ok {
-				fmt.Printf("indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
+				fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
 				continue
 			}
 			if strings.ToLower(filepath.Base(file.Name)) == "jndimanager.class" {
 				buf := make([]byte, sz)
 				if _, err := ra.ReadAt(buf, 0); err != nil {
-					fmt.Printf("can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
+					fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
 					continue
 				}
 				if !bytes.Contains(buf, []byte("Invalid JNDI URI - {}")) {
-					fmt.Printf("indicator for vulnerable component found in %s (%s): %s\n",
+					fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n",
 						path, file.Name, "JndiManager class missing new error message string literal")
 				}
 			}
 		case ".jar", ".war", ".ear":
 			fr, err := file.Open()
 			if err != nil {
-				fmt.Printf("can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
+				fmt.Fprintf(logFile, "can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
 				continue
 			}
 			buf, err := ioutil.ReadAll(fr)
 			fr.Close()
 			if err != nil {
-				fmt.Printf("can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
+				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
 			}
 			handleJar(path+"::"+file.Name, bytes.NewReader(buf), int64(len(buf)))
 		}
@@ -148,10 +150,12 @@ func (flags excludeFlags) Has(path string) bool {
 
 var excludes excludeFlags
 var verbose bool
+var logFileName string
 
 func main() {
 	flag.Var(&excludes, "exclude", "paths to exclude")
 	flag.BoolVar(&verbose, "verbose", false, "log every archive file considered")
+	flag.StringVar(&logFileName, "log", "", "log file to write output to")
 	flag.Parse()
 
 	fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", filepath.Base(os.Args[0]))
@@ -159,10 +163,21 @@ func main() {
 		fmt.Printf("Usage: %s [ paths ... ]\n", os.Args[0])
 		os.Exit(1)
 	}
+
+	if logFileName != "" {
+		f, err := os.Create(logFileName)
+		if err != nil {
+			fmt.Println("Could not create log file")
+			os.Exit(2)
+		}
+		logFile = f
+		defer logFile.Close()
+	}
+
 	for _, root := range flag.Args() {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				fmt.Printf("%s: %s\n", path, err)
+				fmt.Fprintf(logFile, "%s: %s\n", path, err)
 				return nil
 			}
 			if excludes.Has(path) {
@@ -175,17 +190,17 @@ func main() {
 			case ".jar", ".war", ".ear":
 				f, err := os.Open(path)
 				if err != nil {
-					fmt.Printf("can't open %s: %v", path, err)
+					fmt.Fprintf(logFile, "can't open %s: %v", path, err)
 					return nil
 				}
 				defer f.Close()
 				sz, err := f.Seek(0, os.SEEK_END)
 				if err != nil {
-					fmt.Printf("can't seek in %s: %v", path, err)
+					fmt.Fprintf(logFile, "can't seek in %s: %v", path, err)
 					return nil
 				}
 				if _, err := f.Seek(0, os.SEEK_END); err != nil {
-					fmt.Printf("can't seek in %s: %v", path, err)
+					fmt.Fprintf(logFile, "can't seek in %s: %v", path, err)
 					return nil
 				}
 				handleJar(path, f, sz)
@@ -195,5 +210,5 @@ func main() {
 			return nil
 		})
 	}
-	fmt.Println("\nScan finished")
+	fmt.Fprintln(logFile, "\nScan finished")
 }
