@@ -58,16 +58,17 @@ var vulnVersions = map[string]string{
 	"9a54a585ed491573e80e0b32e964e5eb4d6c4068d2abffff628e3c69ef9102cf": "log4j 2.0-beta5",               // MessagePatternConverter.class
 	"357120b06f61475033d152505c3d43a57c9a9bdc05b835d0939f1662b48fc6c3": "log4j 2.0-beta6/beta7/beta8",   // MessagePatternConverter.class
 
-	"6adb3617902180bdf9cbcfc08b5a11f3fac2b44ef1828131296ac41397435e3d": "log4j 1.2.4",         // SocketNode.class
-	"3ef93e9cb937295175b75182e42ba9a0aa94f9f8e295236c9eef914348efeef0": "log4j 1.2.6-1.2.9",   // SocketNode.class
-	"bee4a5a70843a981e47207b476f1e705c21fc90cb70e95c3b40d04a2191f33e9": "log4j 1.2.8",         // SocketNode.class
-	"7b996623c05f1a25a57fb5b43c519c2ec02ec2e647c2b97b3407965af928c9a4": "log4j 1.2.15",        // SocketNode.class
-	"688a3dadfb1c0a08fb2a2885a356200eb74e7f0f26a197d358d74f2faf6e8f46": "log4j 1.2.16",        // SocketNode.class
-	"8ef0ebdfbf28ec14b2267e6004a8eea947b4411d3c30d228a7b48fae36431d74": "log4j 1.2.17",        // SocketNode.class
-	"d778227b779f8f3a2850987e3cfe6020ca26c299037fdfa7e0ac8f81385963e6": "log4j 1.2.11",        // SocketNode.class
-	"ed5d53deb29f737808521dd6284c2d7a873a59140e702295a80bd0f26988f53a": "log4j 1.2.5",         // SocketNode.class
-	"f3b815a2b3c74851ff1b94e414c36f576fbcdf52b82b805b2e18322b3f5fc27c": "log4j 1.2.12",        // SocketNode.class
-	"fbda3cfc5853ab4744b853398f2b3580505f5a7d67bfb200716ef6ae5be3c8b7": "log4j 1.2.13-1.2.14", // SocketNode.class
+	"6adb3617902180bdf9cbcfc08b5a11f3fac2b44ef1828131296ac41397435e3d": "log4j 1.2.4",                // SocketNode.class
+	"3ef93e9cb937295175b75182e42ba9a0aa94f9f8e295236c9eef914348efeef0": "log4j 1.2.6-1.2.9",          // SocketNode.class
+	"bee4a5a70843a981e47207b476f1e705c21fc90cb70e95c3b40d04a2191f33e9": "log4j 1.2.8",                // SocketNode.class
+	"7b996623c05f1a25a57fb5b43c519c2ec02ec2e647c2b97b3407965af928c9a4": "log4j 1.2.15",               // SocketNode.class
+	"688a3dadfb1c0a08fb2a2885a356200eb74e7f0f26a197d358d74f2faf6e8f46": "log4j 1.2.16",               // SocketNode.class
+	"8ef0ebdfbf28ec14b2267e6004a8eea947b4411d3c30d228a7b48fae36431d74": "log4j 1.2.17",               // SocketNode.class
+	"d778227b779f8f3a2850987e3cfe6020ca26c299037fdfa7e0ac8f81385963e6": "log4j 1.2.11",               // SocketNode.class
+	"ed5d53deb29f737808521dd6284c2d7a873a59140e702295a80bd0f26988f53a": "log4j 1.2.5",                // SocketNode.class
+	"f3b815a2b3c74851ff1b94e414c36f576fbcdf52b82b805b2e18322b3f5fc27c": "log4j 1.2.12",               // SocketNode.class
+	"fbda3cfc5853ab4744b853398f2b3580505f5a7d67bfb200716ef6ae5be3c8b7": "log4j 1.2.13-1.2.14",        // SocketNode.class
+	"287c1d40f2a4bc0055b32b45f12f01bdc2a27379ec33fe13a084bf69a1f4c6e1": "log4j 1.2.15.v201012070815", // SocketNode.class
 }
 
 func handleJar(path string, ra io.ReaderAt, sz int64) {
