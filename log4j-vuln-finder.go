@@ -74,6 +74,7 @@ var vulnVersions_v1 = map[string]string{
 }
 
 var logFile = os.Stdout
+var errFile = os.Stderr
 
 func handleJar(path string, ra io.ReaderAt, sz int64) {
 	if verbose {
@@ -105,7 +106,7 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 			}
 			if ignore_v1 != true {
 				if desc, ok := vulnVersions_v1[sum]; ok {
-					fmt.Printf("indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
+					fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
 					continue
 				}
 			}
@@ -175,24 +176,25 @@ func main() {
 	}
 
 	if len(os.Args) < 2 {
-		fmt.Printf("Usage: %s [--verbose] [--quiet] [--ignore-v1] [--exclude path] [ paths ... ]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [--verbose] [--quiet] [--ignore-v1] [--exclude path] [ paths ... ]\n", os.Args[0])
 		os.Exit(1)
 	}
 
 	if logFileName != "" {
 		f, err := os.Create(logFileName)
 		if err != nil {
-			fmt.Println("Could not create log file")
+			fmt.Fprintln(os.Stderr, "Could not create log file")
 			os.Exit(2)
 		}
 		logFile = f
-		defer logFile.Close()
+		errFile = f
+		defer f.Close()
 	}
 
 	for _, root := range flag.Args() {
 		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
-				fmt.Fprintf(logFile, "%s: %s\n", path, err)
+				fmt.Fprintf(errFile, "%s: %s\n", path, err)
 				return nil
 			}
 			if excludes.Has(path) {
@@ -205,17 +207,17 @@ func main() {
 			case ".jar", ".war", ".ear":
 				f, err := os.Open(path)
 				if err != nil {
-					fmt.Fprintf(logFile, "can't open %s: %v", path, err)
+					fmt.Fprintf(errFile, "can't open %s: %v", path, err)
 					return nil
 				}
 				defer f.Close()
 				sz, err := f.Seek(0, os.SEEK_END)
 				if err != nil {
-					fmt.Fprintf(logFile, "can't seek in %s: %v", path, err)
+					fmt.Fprintf(errFile, "can't seek in %s: %v", path, err)
 					return nil
 				}
 				if _, err := f.Seek(0, os.SEEK_END); err != nil {
-					fmt.Fprintf(logFile, "can't seek in %s: %v", path, err)
+					fmt.Fprintf(errFile, "can't seek in %s: %v", path, err)
 					return nil
 				}
 				handleJar(path, f, sz)
