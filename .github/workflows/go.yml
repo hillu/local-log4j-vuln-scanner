@@ -21,7 +21,7 @@ jobs:
         GOOS=windows go build .
         GOOS=darwin go build -o local-log4j-vuln-scanner.macosx .
         sha256sum local-log4j-vuln-scanner.exe local-log4j-vuln-scanner.macosx local-log4j-vuln-scanner \
-        | awk 'BEGIN { print "# Binaries" } /^([0-9a-f]*)  (.*)$/ { print "- ["$2"]("$2") sha="$1 }' \
+        | awk 'BEGIN { print "# Binaries" } /^([0-9a-f]*)  (.*)$/ { print "- "$2": sha256="$1 }' \
         > relnotes.txt
 
     - name: Upload artifact
