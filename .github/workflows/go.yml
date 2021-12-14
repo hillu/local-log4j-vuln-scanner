@@ -20,6 +20,7 @@ jobs:
         go build .
         GOOS=windows go build .
         GOOS=darwin go build -o local-log4j-vuln-scanner.macosx .
+        sha256sum local-log4j-vuln-scanner.exe local-log4j-vuln-scanner.macosx local-log4j-vuln-scanner
 
     - name: Upload artifact
       uses: actions/upload-artifact@v2
