@@ -69,7 +69,7 @@ func (flags *excludeFlags) String() string {
 }
 
 func (flags *excludeFlags) Set(value string) error {
-	*flags = append(*flags, value)
+	*flags = append(*flags, filepath.Clean(value))
 	return nil
 }
 
@@ -117,7 +117,7 @@ func main() {
 	}
 
 	for _, root := range flag.Args() {
-		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		filepath.Walk(filepath.Clean(root), func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				fmt.Fprintf(errFile, "%s: %s\n", path, err)
 				return nil
