@@ -89,7 +89,7 @@ var quiet bool
 var ignoreV1 bool
 
 func main() {
-	flag.Var(&excludes, "exclude", "paths to exclude")
+	flag.Var(&excludes, "exclude", "paths to exclude (can be used multiple times)")
 	flag.BoolVar(&verbose, "verbose", false, "log every archive file considered")
 	flag.StringVar(&logFileName, "log", "", "log file to write output to")
 	flag.BoolVar(&quiet, "quiet", false, "no ouput unless vulnerable")
