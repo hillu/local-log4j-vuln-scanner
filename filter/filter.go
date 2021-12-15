@@ -22,6 +22,12 @@ func IsVulnerableClass(buf []byte, filename string, examineV1 bool) string {
 		if desc, ok := vulnVersionsV1[sum]; ok {
 			return desc
 		}
+		// cf. https://sources.debian.org/src/apache-log4j1.2/1.2.17-10/debian/patches/CVE-2019-17571.patch
+		if strings.ToLower(filepath.Base(filename)) == "socketnode.class" &&
+			bytes.Contains(buf, []byte("org/apache/log4j")) &&
+			!bytes.Contains(buf, []byte("FilteredObjectInputStream")) {
+			return "SocketNode class missing FilteredObjectInputStream patch"
+		}
 	}
 
 	if strings.ToLower(filepath.Base(filename)) == "jndimanager.class" &&
