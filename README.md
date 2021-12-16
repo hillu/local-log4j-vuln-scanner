@@ -24,8 +24,10 @@ page.
 
 # Using the scanner
 
-``` console
-$ ./log4j-vuln-scanner [--verbose] [--ignore-v1] [--exclude /path/to/exclude …] /path/to/app1 /path/to/app2 …
+```
+$ ./local-log4j-vuln-scanner [--verbose] [--quiet] [--ignore-v1] \
+    [--exclude /path/to/exclude …] [--log /path/to/file.log] \
+    /path/to/app1 /path/to/app2 …
 ```
 
 The `--verbose` flag will show every .jar and .war file checked, even if no problem is found.
