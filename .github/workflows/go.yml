@@ -13,6 +13,9 @@ jobs:
       with:
         go-version: 1.16
 
+    - name: Test
+      run: go test ./...
+
     - name: Build
       run: |
         export GOFLAGS="-buildmode=pie -trimpath"
