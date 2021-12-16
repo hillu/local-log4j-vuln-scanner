@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hillu/local-log4j-vuln-scanner/filter"
+	"github.com/timkatje/local-log4j-vuln-scanner/filter"
 )
 
 var logFile = os.Stdout

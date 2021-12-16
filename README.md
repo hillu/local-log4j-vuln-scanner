@@ -19,7 +19,7 @@ classes from JAR files by rewriting the ZIP archive structure.
 
 Binaries for x86_64 Windows, Linux, MacOSX for tagged releases are
 provided via the
-[Releases](https://github.com/hillu/local-log4j-vuln-scanner/releases)
+[Releases](https://github.com/timkatje/local-log4j-vuln-scanner/releases)
 page.
 
 # Using the scanner
