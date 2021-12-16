@@ -23,14 +23,16 @@ func IsVulnerableClass(buf []byte, filename string, examineV1 bool) string {
 			return desc
 		}
 		// cf. https://sources.debian.org/src/apache-log4j1.2/1.2.17-10/debian/patches/CVE-2019-17571.patch
-		if strings.ToLower(filepath.Base(filename)) == "socketnode.class" &&
+		if strings.Contains(strings.ToLower(filepath.Base(filename)), "socketnode.") &&
+			bytes.Equal(buf[:4], []byte{0xca, 0xfe, 0xba, 0xbe}) &&
 			bytes.Contains(buf, []byte("org/apache/log4j")) &&
 			!bytes.Contains(buf, []byte("FilteredObjectInputStream")) {
 			return "SocketNode class missing FilteredObjectInputStream patch"
 		}
 	}
 
-	if strings.ToLower(filepath.Base(filename)) == "jndimanager.class" &&
+	if strings.Contains(strings.ToLower(filepath.Base(filename)), "jndimanager.") &&
+		bytes.Equal(buf[:4], []byte{0xca, 0xfe, 0xba, 0xbe}) &&
 		!bytes.Contains(buf, []byte("Invalid JNDI URI - {}")) {
 		return "JndiManager class missing new error message string literal"
 	}

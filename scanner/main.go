@@ -27,6 +27,9 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 		return
 	}
 	for _, file := range zr.File {
+		if file.FileInfo().IsDir() {
+			continue
+		}
 		switch strings.ToLower(filepath.Ext(file.Name)) {
 		case ".jar", ".war", ".ear":
 			fr, err := file.Open()
@@ -40,20 +43,22 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
 			}
 			handleJar(path+"::"+file.Name, bytes.NewReader(buf), int64(len(buf)))
-
 		default:
 			fr, err := file.Open()
 			if err != nil {
 				fmt.Fprintf(logFile, "can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
 				continue
 			}
+
+			// Identify class filess by magic bytes
 			buf := bytes.NewBuffer(nil)
 			if _, err := io.CopyN(buf, fr, 4); err != nil {
-				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
+				if err == io.EOF {
+					fmt.Fprintf(logFile, "can't read magic from JAR file member: %s (%s): %v\n", path, file.Name, err)
+				}
 				fr.Close()
 				continue
-			} else if bytes.Compare(buf.Bytes(), []byte{0xca, 0xfe, 0xba, 0xbe}) != 0 {
-				// not a class file
+			} else if !bytes.Equal(buf.Bytes(), []byte{0xca, 0xfe, 0xba, 0xbe}) {
 				fr.Close()
 				continue
 			}
