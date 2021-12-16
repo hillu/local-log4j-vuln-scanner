@@ -54,7 +54,9 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 			buf := bytes.NewBuffer(nil)
 			if _, err := io.CopyN(buf, fr, 4); err != nil {
 				if err == io.EOF {
-					fmt.Fprintf(logFile, "can't read magic from JAR file member: %s (%s): %v\n", path, file.Name, err)
+					if !quiet {
+						fmt.Fprintf(logFile, "can't read magic from JAR file member: %s (%s): %v\n", path, file.Name, err)
+					}
 				}
 				fr.Close()
 				continue
