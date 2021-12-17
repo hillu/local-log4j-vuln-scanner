@@ -27,25 +27,10 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 		return
 	}
 	for _, file := range zr.File {
+		if file.FileInfo().IsDir() {
+			continue
+		}
 		switch strings.ToLower(filepath.Ext(file.Name)) {
-		case ".class":
-			fr, err := file.Open()
-			if err != nil {
-				fmt.Fprintf(logFile, "can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
-				continue
-			}
-			buf := bytes.NewBuffer(nil)
-			if _, err = io.Copy(buf, fr); err != nil {
-				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
-				fr.Close()
-				continue
-			}
-			fr.Close()
-			if desc := filter.IsVulnerableClass(buf.Bytes(), file.Name, !ignoreV1); desc != "" {
-				fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
-				continue
-			}
-
 		case ".jar", ".war", ".ear":
 			fr, err := file.Open()
 			if err != nil {
@@ -58,6 +43,35 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
 			}
 			handleJar(path+"::"+file.Name, bytes.NewReader(buf), int64(len(buf)))
+		default:
+			fr, err := file.Open()
+			if err != nil {
+				fmt.Fprintf(logFile, "can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
+				continue
+			}
+
+			// Identify class filess by magic bytes
+			buf := bytes.NewBuffer(nil)
+			if _, err := io.CopyN(buf, fr, 4); err != nil {
+				if err != io.EOF && !quiet {
+					fmt.Fprintf(logFile, "can't read magic from JAR file member: %s (%s): %v\n", path, file.Name, err)
+				}
+				fr.Close()
+				continue
+			} else if !bytes.Equal(buf.Bytes(), []byte{0xca, 0xfe, 0xba, 0xbe}) {
+				fr.Close()
+				continue
+			}
+			_, err = io.Copy(buf, fr)
+			fr.Close()
+			if err != nil {
+				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
+				continue
+			}
+			if desc := filter.IsVulnerableClass(buf.Bytes(), file.Name, !ignoreV1); desc != "" {
+				fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
+				continue
+			}
 		}
 	}
 }
@@ -69,7 +83,7 @@ func (flags *excludeFlags) String() string {
 }
 
 func (flags *excludeFlags) Set(value string) error {
-	*flags = append(*flags, value)
+	*flags = append(*flags, filepath.Clean(value))
 	return nil
 }
 
@@ -89,7 +103,7 @@ var quiet bool
 var ignoreV1 bool
 
 func main() {
-	flag.Var(&excludes, "exclude", "paths to exclude")
+	flag.Var(&excludes, "exclude", "paths to exclude (can be used multiple times)")
 	flag.BoolVar(&verbose, "verbose", false, "log every archive file considered")
 	flag.StringVar(&logFileName, "log", "", "log file to write output to")
 	flag.BoolVar(&quiet, "quiet", false, "no ouput unless vulnerable")
@@ -101,7 +115,7 @@ func main() {
 	}
 
 	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "Usage: %s [--verbose] [--quiet] [--ignore-v1] [--exclude path] [ paths ... ]\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Usage: %s [--verbose] [--quiet] [--ignore-v1] [--exclude <path>] [--log <file>] [ paths ... ]\n", os.Args[0])
 		os.Exit(1)
 	}
 
@@ -117,7 +131,7 @@ func main() {
 	}
 
 	for _, root := range flag.Args() {
-		filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		filepath.Walk(filepath.Clean(root), func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				fmt.Fprintf(errFile, "%s: %s\n", path, err)
 				return nil

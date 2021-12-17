@@ -24,8 +24,10 @@ page.
 
 # Using the scanner
 
-``` console
-$ ./log4j-vuln-scanner [--verbose] [--ignore-v1] [--exclude /path/to/exclude …] /path/to/app1 /path/to/app2 …
+```
+$ ./local-log4j-vuln-scanner [--verbose] [--quiet] [--ignore-v1] \
+    [--exclude /path/to/exclude …] [--log /path/to/file.log] \
+    /path/to/app1 /path/to/app2 …
 ```
 
 The `--verbose` flag will show every .jar and .war file checked, even if no problem is found.
@@ -53,7 +55,7 @@ Scan finished
 
 **Caution:** Use this at your own risk and keep the original JAR files.
 ```
-$ ./log4j-vuln-patcher log4j-core-2.14.1.jar log4j-core-2.14.1-patched.jar
+$ ./local-log4j-vuln-patcher log4j-core-2.14.1.jar log4j-core-2.14.1-patched.jar
 Filtering out org/apache/logging/log4j/core/pattern/MessagePatternConverter.class (log4j 2.14)
 Filtering out org/apache/logging/log4j/core/net/JndiManager.class (log4j 2.14.0-2.14.1)
 

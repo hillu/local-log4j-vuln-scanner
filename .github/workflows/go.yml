@@ -13,16 +13,19 @@ jobs:
       with:
         go-version: 1.16
 
+    - name: Test
+      run: go test ./...
+
     - name: Build
       run: |
         export GOFLAGS="-buildmode=pie -trimpath"
         go version
-        go build              -o local-log4j-vuln-scanner        ./scanner
-        GOOS=windows go build -o local-log4j-vuln-scanner.exe    ./scanner
-        GOOS=darwin go build  -o local-log4j-vuln-scanner.macosx ./scanner
-        go build              -o local-log4j-vuln-patcher        ./patcher
-        GOOS=windows go build -o local-log4j-vuln-patcher.exe    ./patcher
-        GOOS=darwin go build  -o local-log4j-vuln-patcher.macosx ./patcher
+        GOFLAGS="-trimpath" go build -o local-log4j-vuln-scanner        ./scanner
+        GOOS=windows        go build -o local-log4j-vuln-scanner.exe    ./scanner
+        GOOS=darwin         go build -o local-log4j-vuln-scanner.macosx ./scanner
+        GOFLAGS="-trimpath" go build -o local-log4j-vuln-patcher        ./patcher
+        GOOS=windows        go build -o local-log4j-vuln-patcher.exe    ./patcher
+        GOOS=darwin         go build -o local-log4j-vuln-patcher.macosx ./patcher
         sha256sum \
             local-log4j-vuln-scanner \
             local-log4j-vuln-scanner.exe \
