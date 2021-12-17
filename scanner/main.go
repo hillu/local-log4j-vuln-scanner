@@ -1,8 +1,10 @@
 package main
 
 import (
+	"archive/tar"
 	"archive/zip"
 	"bytes"
+	"compress/gzip"
 	"flag"
 	"fmt"
 	"io"
@@ -16,6 +18,48 @@ import (
 
 var logFile = os.Stdout
 var errFile = os.Stderr
+
+func handleTar(path string, ra io.Reader, sz int64) {
+	if verbose {
+		fmt.Fprintf(logFile, "Inspecting %s...\n", path)
+	}
+	gzf, err := gzip.NewReader(ra)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	tr := tar.NewReader(gzf)
+	for true {
+		file, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			fmt.Fprintf(logFile, "can't open archive file: %s (size %d): %v\n", path, sz, err)
+			return
+		}
+		if file.Typeflag == tar.TypeDir {
+			continue
+		}
+		switch strings.ToLower(filepath.Ext(file.Name)) {
+		case ".jar", ".war", ".ear", ".zip":
+			buf, err := ioutil.ReadAll(tr)
+			if err != nil {
+				fmt.Fprintf(logFile, "can't open TAR file member for reading: %s (%s): %v\n", path, file.Name, err)
+				continue
+			}
+			handleJar(path+"::"+file.Name, bytes.NewReader(buf), int64(len(buf)))
+		default:
+			buf, err := ioutil.ReadAll(tr)
+			if err != nil {
+				fmt.Fprintf(logFile, "can't open TAR file member for reading: %s (%s): %v\n", path, file.Name, err)
+				continue
+			}
+			identifyClassFile(ioutil.NopCloser(bytes.NewReader(buf)), path, file.Name)
+		}
+	}
+}
 
 func handleJar(path string, ra io.ReaderAt, sz int64) {
 	if verbose {
@@ -31,7 +75,7 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 			continue
 		}
 		switch strings.ToLower(filepath.Ext(file.Name)) {
-		case ".jar", ".war", ".ear":
+		case ".jar", ".war", ".ear", ".zip":
 			fr, err := file.Open()
 			if err != nil {
 				fmt.Fprintf(logFile, "can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
@@ -49,30 +93,34 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 				fmt.Fprintf(logFile, "can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
 				continue
 			}
-
-			// Identify class filess by magic bytes
-			buf := bytes.NewBuffer(nil)
-			if _, err := io.CopyN(buf, fr, 4); err != nil {
-				if err != io.EOF && !quiet {
-					fmt.Fprintf(logFile, "can't read magic from JAR file member: %s (%s): %v\n", path, file.Name, err)
-				}
-				fr.Close()
-				continue
-			} else if !bytes.Equal(buf.Bytes(), []byte{0xca, 0xfe, 0xba, 0xbe}) {
-				fr.Close()
-				continue
-			}
-			_, err = io.Copy(buf, fr)
-			fr.Close()
-			if err != nil {
-				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
-				continue
-			}
-			if desc := filter.IsVulnerableClass(buf.Bytes(), file.Name, !ignoreV1); desc != "" {
-				fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
-				continue
-			}
+			identifyClassFile(fr, path, file.Name)
 		}
+	}
+}
+
+func identifyClassFile(fr io.ReadCloser, path string, name string) {
+	// Identify class files by magic bytes
+	buf := bytes.NewBuffer(nil)
+	if _, err := io.CopyN(buf, fr, 4); err != nil {
+		if err != io.EOF && !quiet {
+			fmt.Fprintf(logFile, "can't read magic from JAR file member: %s (%s): %v\n", path, name, err)
+		}
+		fr.Close()
+		return
+	} else if !bytes.Equal(buf.Bytes(), []byte{0xca, 0xfe, 0xba, 0xbe}) {
+		fr.Close()
+		return
+	}
+	_, err := io.Copy(buf, fr)
+	fr.Close()
+	if err != nil {
+		if !quiet {
+			fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, name, err)
+		}
+		return
+	}
+	if desc := filter.IsVulnerableClass(buf.Bytes(), name, !ignoreV1); desc != "" {
+		fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n", path, name, desc)
 	}
 }
 
@@ -143,7 +191,7 @@ func main() {
 				return nil
 			}
 			switch ext := strings.ToLower(filepath.Ext(path)); ext {
-			case ".jar", ".war", ".ear":
+			case ".jar", ".war", ".ear", ".zip", ".gz", ".tgz":
 				f, err := os.Open(path)
 				if err != nil {
 					fmt.Fprintf(errFile, "can't open %s: %v\n", path, err)
@@ -159,7 +207,14 @@ func main() {
 					fmt.Fprintf(errFile, "can't seek in %s: %v\n", path, err)
 					return nil
 				}
-				handleJar(path, f, sz)
+				switch ext {
+				case ".gz", ".tgz":
+					ff, _ := os.Open(path)
+					defer ff.Close()
+					handleTar(path, ff, sz)
+				default:
+					handleJar(path, f, sz)
+				}
 			default:
 				return nil
 			}
