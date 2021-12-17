@@ -33,7 +33,10 @@ func IsVulnerableClass(buf []byte, filename string, examineV1 bool) string {
 
 	if strings.Contains(strings.ToLower(filepath.Base(filename)), "jndimanager.") &&
 		bytes.Equal(buf[:4], []byte{0xca, 0xfe, 0xba, 0xbe}) &&
-		!bytes.Contains(buf, []byte("Invalid JNDI URI - {}")) {
+		// 2.15+
+		!bytes.Contains(buf, []byte("Invalid JNDI URI - {}")) &&
+		// 2.12.2. Note the extra space for extra security.
+		!bytes.Contains(buf, []byte("Invalid  JNDI URI - {}")) {
 		return "JndiManager class missing new error message string literal"
 	}
 
@@ -55,6 +58,7 @@ var vulnVersions = map[string]string{
 	"77323460255818f4cbfe180141d6001bfb575b429e00a07cbceabd59adf334d6": "log4j 2.14.0-2.14.1", // JndiManager.class
 	"ae950f9435c0ef3373d4030e7eff175ee11044e584b7f205b7a9804bbe795f9c": "log4j 2.1-2.3",       // JndiManager.class
 	"c3e95da6542945c1a096b308bf65bbd7fcb96e3d201e5a2257d85d4dedc6a078": "log4j 2.13.0-2.13.3", // JndiManager.class
+	"db07ef1ea174e000b379732681bd835cfede648a7971bf4e9a0d31981582d69e": "log4j-2.15.0",        // JndiManager.class
 }
 
 var vulnVersionsV1 = map[string]string{
