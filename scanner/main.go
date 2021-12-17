@@ -38,7 +38,7 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 				continue
 			}
 			buf, err := ioutil.ReadAll(fr)
-			fr.Close()
+			defer fr.Close()
 			if err != nil {
 				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
 			}
