@@ -44,33 +44,10 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 			}
 			handleJar(path+"::"+file.Name, bytes.NewReader(buf), int64(len(buf)))
 		default:
-			fr, err := file.Open()
-			if err != nil {
-				fmt.Fprintf(logFile, "can't open JAR file member for reading: %s (%s): %v\n", path, file.Name, err)
-				continue
-			}
-
-			// Identify class filess by magic bytes
-			buf := bytes.NewBuffer(nil)
-			if _, err := io.CopyN(buf, fr, 4); err != nil {
-				if err != io.EOF && !quiet {
-					fmt.Fprintf(logFile, "can't read magic from JAR file member: %s (%s): %v\n", path, file.Name, err)
+			if strings.Contains(strings.ToLower(path), "log4j-core-") {
+				if file.Name == "org/apache/logging/log4j/core/lookup/JndiLookup.class" {
+					fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s)\n", path, file.Name)
 				}
-				fr.Close()
-				continue
-			} else if !bytes.Equal(buf.Bytes(), []byte{0xca, 0xfe, 0xba, 0xbe}) {
-				fr.Close()
-				continue
-			}
-			_, err = io.Copy(buf, fr)
-			fr.Close()
-			if err != nil {
-				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
-				continue
-			}
-			if desc := filter.IsVulnerableClass(buf.Bytes(), file.Name, !ignoreV1); desc != "" {
-				fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
-				continue
 			}
 		}
 	}
