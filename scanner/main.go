@@ -1,7 +1,6 @@
 package main
 
 import (
-	"archive/zip"
 	"bytes"
 	"flag"
 	"fmt"
@@ -11,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	zip "github.com/hillu/local-log4j-vuln-scanner/appendedzip"
 	"github.com/hillu/local-log4j-vuln-scanner/filter"
 )
 
