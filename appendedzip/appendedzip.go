@@ -20,7 +20,7 @@ func OpenFile(file string) (*zip.Reader, error) {
 	return NewReader(f, fi.Size())
 }
 
-// OpenReader searches for ZIP beginning-of-file signatures ('P' 'K'
+// NewReader searches for ZIP beginning-of-file signatures ('P' 'K'
 // 03 04) in r and tries to read the file starting at that offset
 // using an encryption-enabled archive/zip, returning a *zip.Reader
 // for the first valid entry, or an error.
