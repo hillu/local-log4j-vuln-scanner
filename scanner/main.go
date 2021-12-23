@@ -108,15 +108,20 @@ func main() {
 	flag.StringVar(&logFileName, "log", "", "log file to write output to")
 	flag.BoolVar(&quiet, "quiet", false, "no ouput unless vulnerable")
 	flag.BoolVar(&ignoreV1, "ignore-v1", false, "ignore log4j 1.x versions")
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
+		flag.PrintDefaults()
+		fmt.Fprint(flag.CommandLine.Output(), "  PATH [, PATH ...]\n        paths to search for Java code\n")
+	}
 	flag.Parse()
+	args := flag.Args()
+	if len(args) < 1 {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	if !quiet {
 		fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", filepath.Base(os.Args[0]))
-	}
-
-	if len(os.Args) < 2 {
-		fmt.Fprintf(os.Stderr, "Usage: %s [--verbose] [--quiet] [--ignore-v1] [--exclude <path>] [--log <file>] [ paths ... ]\n", os.Args[0])
-		os.Exit(1)
 	}
 
 	if logFileName != "" {
@@ -130,7 +135,7 @@ func main() {
 		defer f.Close()
 	}
 
-	for _, root := range flag.Args() {
+	for _, root := range args {
 		filepath.Walk(filepath.Clean(root), func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				fmt.Fprintf(errFile, "%s: %s\n", path, err)
