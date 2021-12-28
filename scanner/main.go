@@ -160,10 +160,6 @@ func main() {
 					fmt.Fprintf(errFile, "can't seek in %s: %v\n", path, err)
 					return nil
 				}
-				if _, err := f.Seek(0, os.SEEK_END); err != nil {
-					fmt.Fprintf(errFile, "can't seek in %s: %v\n", path, err)
-					return nil
-				}
 				handleJar(path, f, sz)
 			default:
 				return nil
