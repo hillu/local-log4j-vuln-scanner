@@ -42,8 +42,8 @@ func TestFilterJndi(t *testing.T) {
 		v{"2.14.0", true},
 		v{"2.14.1", true},
 		v{"2.15.0", true},
-		v{"2.16.0", false},
-		v{"2.16.0-debian", false},
+		v{"2.16.0", true},
+		v{"2.16.0-debian", true},
 		v{"2.17.0", false},
 	} {
 		file := "../testdata/JndiManager.class-" + cand.version
