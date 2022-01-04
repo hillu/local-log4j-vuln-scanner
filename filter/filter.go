@@ -61,7 +61,7 @@ var vulnVersions = map[string]string{
 	"db07ef1ea174e000b379732681bd835cfede648a7971bf4e9a0d31981582d69e": "log4j-2.15.0",        // JndiManager.class
 	"5210e6aae7dd8a61cd16c56937c5f2ed43941487830f46e99d0d3f45bfa6f953": "log4j-2.16.0",        // JndiManager.class
 	"838ed75ea7747fa2c7068f64c76c3f623e7fe4305cdadc2ce5d7b49c7c805221": "log4j-2.16.0-debian", // JndiManager.class
-	"914a64f23e2bcc1ae166af645a21f71f18ad6be8282001ec10b3e45b37064c99": "log4j-2.17.0",        //JndiManager.class
+	"914a64f23e2bcc1ae166af645a21f71f18ad6be8282001ec10b3e45b37064c99": "log4j-2.17.0",        // JndiManager.class
 }
 
 var vulnVersionsV1 = map[string]string{
