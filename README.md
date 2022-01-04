@@ -43,7 +43,10 @@ The `--quiet` flag will supress output except for indicators of a known vulnerab
 
 The `--ignore-v1` flag will _exclude_ checks for log4j 1.x vulnerabilities.
 
-The `--ignore-vulns` flag allows _excluding_ checks for specific vulnerabilities.
+The `--ignore-vulns` flag allows _excluding_ checks for specific
+vulnerabilities. e.g. `-ignore-vulns=CVE-2021-45046,CVE-2021-44832`.
+To check for all known vulnerabilities, pass an empty list like so:
+`-ignore-vulns=`
 
 The `--log` flag allows everythig to be written to a log file instead of stdout/stderr.
 
