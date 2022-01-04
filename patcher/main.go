@@ -43,8 +43,9 @@ func main() {
 		}
 		content := buf.Bytes()
 
-		if desc := filter.IsVulnerableClass(content, member.Name, true); desc != "" {
-			fmt.Printf("Filtering out %s (%s)\n", member.Name, desc)
+		if info := filter.IsVulnerableClass(content, member.Name, filter.CheckAllVulnerabilities); info != nil {
+			fmt.Printf("Filtering out %s (%s %s %s)\n",
+				member.Name, info.Filename, info.Version, info.Vulnerabilities)
 			r.Close()
 			continue
 		}

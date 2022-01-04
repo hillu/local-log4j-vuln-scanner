@@ -42,8 +42,8 @@ func TestFilterJndi(t *testing.T) {
 		v{"2.14.0", true},
 		v{"2.14.1", true},
 		v{"2.15.0", true},
-		v{"2.16.0", false},
-		v{"2.16.0-debian", false},
+		v{"2.16.0", true},
+		v{"2.16.0-debian", true},
 		v{"2.17.0", false},
 	} {
 		file := "../testdata/JndiManager.class-" + cand.version
@@ -52,7 +52,7 @@ func TestFilterJndi(t *testing.T) {
 			t.Logf("can't open %s: %v", file, err)
 			continue
 		}
-		if verdict := IsVulnerableClass(buf, "jndimanager.class", true); (verdict != "") != cand.vulnerable {
+		if verdict := IsVulnerableClass(buf, "jndimanager.class", CheckAllVulnerabilities); (verdict != nil) != cand.vulnerable {
 			if cand.vulnerable {
 				t.Errorf("found %s not to be vulnerable (but it is)", file)
 			} else {
@@ -87,7 +87,7 @@ func TestFilterSocketNode(t *testing.T) {
 			t.Logf("can't open %s: %v", file, err)
 			continue
 		}
-		if verdict := IsVulnerableClass(buf, "socketnode.class", true); (verdict != "") != cand.vulnerable {
+		if verdict := IsVulnerableClass(buf, "socketnode.class", CheckAllVulnerabilities); (verdict != nil) != cand.vulnerable {
 			if cand.vulnerable {
 				t.Errorf("found %s not to be vulnerable (but it is)", file)
 			} else {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archive/zip"
 	"bytes"
 	"flag"
 	"fmt"
@@ -10,7 +11,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	zip "github.com/hillu/local-log4j-vuln-scanner/appendedzip"
 	"github.com/hillu/local-log4j-vuln-scanner/filter"
 )
 
@@ -68,8 +68,9 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
 				continue
 			}
-			if desc := filter.IsVulnerableClass(buf.Bytes(), file.Name, !ignoreV1); desc != "" {
-				fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s\n", path, file.Name, desc)
+			if info := filter.IsVulnerableClass(buf.Bytes(), file.Name, vulns); info != nil {
+				fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s %s %s\n",
+					path, file.Name, info.Filename, info.Version, info.Vulnerabilities&vulns)
 				continue
 			}
 		}
@@ -100,6 +101,8 @@ var excludes excludeFlags
 var verbose bool
 var logFileName string
 var quiet bool
+var vulns filter.Vulnerabilities
+var ignoreVulns filter.Vulnerabilities = filter.CVE_2021_45046 | filter.CVE_2021_44832
 var ignoreV1 bool
 
 func main() {
@@ -108,20 +111,22 @@ func main() {
 	flag.StringVar(&logFileName, "log", "", "log file to write output to")
 	flag.BoolVar(&quiet, "quiet", false, "no ouput unless vulnerable")
 	flag.BoolVar(&ignoreV1, "ignore-v1", false, "ignore log4j 1.x versions")
-	flag.Usage = func() {
-		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
-		flag.PrintDefaults()
-		fmt.Fprint(flag.CommandLine.Output(), "  PATH [, PATH ...]\n        paths to search for Java code\n")
-	}
+	flag.Var(&ignoreVulns, "ignore-vulns", "ignore vulnerabilities")
+
 	flag.Parse()
-	args := flag.Args()
-	if len(args) < 1 {
-		flag.Usage()
-		os.Exit(1)
+
+	if ignoreV1 {
+		ignoreVulns |= filter.CVE_2019_17571
 	}
+	vulns = filter.CheckAllVulnerabilities ^ ignoreVulns
 
 	if !quiet {
 		fmt.Printf("%s - a simple local log4j vulnerability scanner\n\n", filepath.Base(os.Args[0]))
+	}
+
+	if len(os.Args) < 2 {
+		fmt.Fprintf(os.Stderr, "Usage: %s [--verbose] [--quiet] [--ignore-v1] [--exclude <path>] [--log <file>] [ paths ... ]\n", os.Args[0])
+		os.Exit(1)
 	}
 
 	if logFileName != "" {
@@ -135,13 +140,17 @@ func main() {
 		defer f.Close()
 	}
 
-	for _, root := range args {
+	fmt.Fprintf(logFile, "Checking for vulnerabilities: %s\n", vulns)
+
+	for _, root := range flag.Args() {
 		filepath.Walk(filepath.Clean(root), func(path string, info os.FileInfo, err error) error {
+			fmt.Fprintf(logFile, "examining %s\n", path)
 			if err != nil {
 				fmt.Fprintf(errFile, "%s: %s\n", path, err)
 				return nil
 			}
 			if excludes.Has(path) {
+				fmt.Fprintf(logFile, "Skipping %s\n", path)
 				return filepath.SkipDir
 			}
 			if info.IsDir() {
@@ -157,6 +166,10 @@ func main() {
 				defer f.Close()
 				sz, err := f.Seek(0, os.SEEK_END)
 				if err != nil {
+					fmt.Fprintf(errFile, "can't seek in %s: %v\n", path, err)
+					return nil
+				}
+				if _, err := f.Seek(0, os.SEEK_END); err != nil {
 					fmt.Fprintf(errFile, "can't seek in %s: %v\n", path, err)
 					return nil
 				}
