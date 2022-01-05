@@ -130,6 +130,43 @@ var vulnVersions = map[string]FileInfo{
 	"fd6c63c11f7a6b52eff04be1de3477c9ddbbc925022f7216320e6db93f1b7d29": FileInfo{
 		"log4j 2.0", "JndiLookup.class",
 		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"a768e5383990b512f9d4f97217eda94031c2fa4aea122585f5a475ab99dc7307": FileInfo{
+		"2.1-2.3", "JndiLookup.class",
+		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"a534961bbfce93966496f86c9314f46939fd082bb89986b48b7430c3bea903f7": FileInfo{
+		"2.4-2.5", "JndiLookup.class",
+		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"e8ffed196e04f81b015f847d4ec61f22f6731c11b5a21b1cfc45ccbc58b8ea45": FileInfo{
+		"2.6-2.6.2", "JndiLookup.class",
+		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"cee2305065bb61d434cdb45cfdaa46e7da148e5c6a7678d56f3e3dc8d7073eae": FileInfo{
+		"2.7", "JndiLookup.class",
+		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"66c89e2d5ae674641138858b571e65824df6873abb1677f7b2ef5c0dd4dbc442": FileInfo{
+		"2.8-2.8.1", "JndiLookup.class",
+		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"d4ec57440cd6db6eaf6bcb6b197f1cbaf5a3e26253d59578d51db307357cbf15": FileInfo{
+		"2.8.2", "JndiLookup.class",
+		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"0f038a1e0aa0aff76d66d1440c88a2b35a3d023ad8b2e3bac8e25a3208499f7e": FileInfo{
+		"2.9.0-2.11.2", "JndiLookup.class",
+		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"5c104d16ff9831b456e4d7eaf66bcf531f086767782d08eece3fb37e40467279": FileInfo{
+		"2.12.0-2.12.1", "JndiLookup.class",
+		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"2b32bfc0556ea59307b9b2fde75b6dfbb5bf4f1d008d1402bc9a2357d8a8c61f": FileInfo{
+		"2.13.0-2.13.3", "JndiLookup.class",
+		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"ad5acfcbcb02f849ab695276285b6a5aef5f187b4d36b2159439084f4c732a4b": FileInfo{
+		"2.13.3 (debian)", "JndiLookup.class",
+		CVE_2021_44228 | CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"84057480ba7da6fb6d9ea50c53a00848315833c1f34bf8f4a47f11a14499ae3f": FileInfo{
+		"2.14.0-2.15.0", "JndiLookup.class",
+		CVE_2021_45046 | CVE_2021_45105 | CVE_2021_44832},
+	"3ce98fd29cd9467cb97bd9819677ee3cdbb35205c4d15f0e3cf6182bb196ef7c": FileInfo{
+		"2.16.0", "JndiLookup.class", CVE_2021_45105 | CVE_2021_44832},
+	"e732b989d3ffcb718ca5476781f2941bbc36f41ed929fed915a24801b40f8052": FileInfo{
+		"2.17.0-2.17.1", "JndiLookup.class", 0},
 
 	"1584b839cfceb33a372bb9e6f704dcea9701fa810a9ba1ad3961615a5b998c32": FileInfo{
 		"log4j 2.7-2.8.1", "JndiManager.class",
