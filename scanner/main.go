@@ -151,8 +151,10 @@ func main() {
 				fmt.Fprintf(errFile, "%s: %s\n", path, err)
 				return nil
 			}
-			if excludes.Has(path) && !quiet {
-				fmt.Fprintf(logFile, "Skipping %s\n", path)
+			if excludes.Has(path){
+				if !quiet {
+					fmt.Fprintf(logFile, "Skipping %s\n", path)
+				}
 				return filepath.SkipDir
 			}
 			if info.IsDir() {
