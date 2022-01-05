@@ -144,12 +144,14 @@ func main() {
 
 	for _, root := range flag.Args() {
 		filepath.Walk(filepath.Clean(root), func(path string, info os.FileInfo, err error) error {
-			fmt.Fprintf(logFile, "examining %s\n", path)
+			if !quiet {
+				fmt.Fprintf(logFile, "examining %s\n", path)
+			}
 			if err != nil {
 				fmt.Fprintf(errFile, "%s: %s\n", path, err)
 				return nil
 			}
-			if excludes.Has(path) {
+			if excludes.Has(path) && !quiet {
 				fmt.Fprintf(logFile, "Skipping %s\n", path)
 				return filepath.SkipDir
 			}
@@ -166,10 +168,6 @@ func main() {
 				defer f.Close()
 				sz, err := f.Seek(0, os.SEEK_END)
 				if err != nil {
-					fmt.Fprintf(errFile, "can't seek in %s: %v\n", path, err)
-					return nil
-				}
-				if _, err := f.Seek(0, os.SEEK_END); err != nil {
 					fmt.Fprintf(errFile, "can't seek in %s: %v\n", path, err)
 					return nil
 				}
