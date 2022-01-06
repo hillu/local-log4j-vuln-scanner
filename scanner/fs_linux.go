@@ -106,14 +106,13 @@ const (
 	OPENAFS_FS_MAGIC = 0x5346414f
 )
 
-func isNetworkFS(path string) bool {
+func isPseudoFS(path string) bool {
 	var buf syscall.Statfs_t
 	if err := syscall.Statfs(path, &buf); err != nil {
 		return false
 	}
 	switch uint32(buf.Type) {
 	case
-		// pseudo filesystems
 		BDEVFS_MAGIC,
 		BINFMTFS_MAGIC,
 		CGROUP_SUPER_MAGIC,
@@ -125,8 +124,20 @@ func isNetworkFS(path string) bool {
 		PROC_SUPER_MAGIC,
 		SELINUX_MAGIC,
 		SMACK_MAGIC,
-		SYSFS_MAGIC,
-		// network filesystems
+		SYSFS_MAGIC:
+		return true
+	default:
+		return false
+	}
+}
+
+func isNetworkFS(path string) bool {
+	var buf syscall.Statfs_t
+	if err := syscall.Statfs(path, &buf); err != nil {
+		return false
+	}
+	switch uint32(buf.Type) {
+	case
 		AFS_FS_MAGIC,
 		OPENAFS_FS_MAGIC,
 		CEPH_SUPER_MAGIC,

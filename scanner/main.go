@@ -104,6 +104,7 @@ var quiet bool
 var vulns filter.Vulnerabilities
 var ignoreVulns filter.Vulnerabilities = filter.CVE_2021_45046 | filter.CVE_2021_44832
 var ignoreV1 bool
+var network bool
 
 func main() {
 	flag.Var(&excludes, "exclude", "paths to exclude (can be used multiple times)")
@@ -112,6 +113,7 @@ func main() {
 	flag.BoolVar(&quiet, "quiet", false, "no ouput unless vulnerable")
 	flag.BoolVar(&ignoreV1, "ignore-v1", false, "ignore log4j 1.x versions")
 	flag.Var(&ignoreVulns, "ignore-vulns", "ignore vulnerabilities")
+	flag.BoolVar(&network, "scan-network", false, "search network filesystems")
 
 	flag.Parse()
 
@@ -144,12 +146,19 @@ func main() {
 
 	for _, root := range flag.Args() {
 		filepath.Walk(filepath.Clean(root), func(path string, info os.FileInfo, err error) error {
-			if isNetworkFS(path) {
+			if isPseudoFS(path) {
 				if !quiet {
-					fmt.Fprintf(logFile, "Skipping %s: pseudo or network filesystem\n", path)
+					fmt.Fprintf(logFile, "Skipping %s: pseudo filesystem\n", path)
 				}
 				return filepath.SkipDir
 			}
+			if !network && isNetworkFS(path) {
+				if !quiet {
+					fmt.Fprintf(logFile, "Skipping %s: network filesystem\n", path)
+				}
+				return filepath.SkipDir
+			}
+
 			if !quiet {
 				fmt.Fprintf(logFile, "examining %s\n", path)
 			}

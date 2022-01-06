@@ -17,13 +17,26 @@ func typeToString(name [16]int8) string {
 	return string(b)
 }
 
+func isPseudoFS(path string) bool {
+	var buf syscall.Statfs_t
+	if err := syscall.Statfs(path, &buf); err != nil {
+		return false
+	}
+	switch typeToString(buf.Fstypename) {
+	case "devfs":
+		return true
+	default:
+		return false
+	}
+}
+
 func isNetworkFS(path string) bool {
 	var buf syscall.Statfs_t
 	if err := syscall.Statfs(path, &buf); err != nil {
 		return false
 	}
 	switch typeToString(buf.Fstypename) {
-	case "nfs", "afpfs", "smbfs", "webdav", "devfs":
+	case "nfs", "afpfs", "smbfs", "webdav":
 		return true
 	default:
 		return false

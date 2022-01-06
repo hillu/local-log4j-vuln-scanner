@@ -35,7 +35,9 @@ page.
 ```
 $ ./local-log4j-vuln-scanner [--verbose] [--quiet] \
     [--ignore-v1] [--ignore-vulns=...] \
-    [--exclude /path/to/exclude …] [--log /path/to/file.log] \
+    [--exclude /path/to/exclude …] \
+	[--scan-network] \
+	[--log /path/to/file.log] \
     /path/to/app1 /path/to/app2 …
 ```
 
@@ -53,6 +55,8 @@ To check for all known vulnerabilities, pass an empty list like so:
 The `--log` flag allows everythig to be written to a log file instead of stdout/stderr.
 
 Use the `--exclude` flag to exclude subdirectories from being scanned. Can be used multiple times.
+
+The `--scan-network` flag tells the scanner to search network filesystems (disabled by default). This has not been implemented for Windows.
 
 If class files indicating one of the vulnerabilities are found,
 messages like the following are printed to standard output:
