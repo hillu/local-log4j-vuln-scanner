@@ -144,6 +144,12 @@ func main() {
 
 	for _, root := range flag.Args() {
 		filepath.Walk(filepath.Clean(root), func(path string, info os.FileInfo, err error) error {
+			if isNetworkFS(path) {
+				if !quiet {
+					fmt.Fprintf(logFile, "Skipping %s: pseudo or network filesystem\n", path)
+				}
+				return filepath.SkipDir
+			}
 			if !quiet {
 				fmt.Fprintf(logFile, "examining %s\n", path)
 			}
@@ -151,9 +157,9 @@ func main() {
 				fmt.Fprintf(errFile, "%s: %s\n", path, err)
 				return nil
 			}
-			if excludes.Has(path){
+			if excludes.Has(path) {
 				if !quiet {
-					fmt.Fprintf(logFile, "Skipping %s\n", path)
+					fmt.Fprintf(logFile, "Skipping %s: explicitly excluded\n", path)
 				}
 				return filepath.SkipDir
 			}
