@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/hillu/local-log4j-vuln-scanner/filter"
 )
@@ -17,7 +18,7 @@ import (
 var logFile = os.Stdout
 var errFile = os.Stderr
 
-func handleJar(path string, ra io.ReaderAt, sz int64) {
+func handleJar(path string, ra io.ReaderAt, sz int64, wg *sync.WaitGroup) {
 	if verbose {
 		fmt.Fprintf(logFile, "Inspecting %s...\n", path)
 	}
@@ -42,7 +43,9 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 			if err != nil {
 				fmt.Fprintf(logFile, "can't read JAR file member: %s (%s): %v\n", path, file.Name, err)
 			}
-			handleJar(path+"::"+file.Name, bytes.NewReader(buf), int64(len(buf)))
+			wg.Add(1)
+			defer wg.Done()
+			go handleJar(path+"::"+file.Name, bytes.NewReader(buf), int64(len(buf)), wg)
 		default:
 			fr, err := file.Open()
 			if err != nil {
@@ -143,7 +146,7 @@ func main() {
 	}
 
 	fmt.Fprintf(logFile, "Checking for vulnerabilities: %s\n", vulns)
-
+	var wg sync.WaitGroup
 	for _, root := range flag.Args() {
 		filepath.Walk(filepath.Clean(root), func(path string, info os.FileInfo, err error) error {
 			if isPseudoFS(path) {
@@ -188,14 +191,16 @@ func main() {
 					fmt.Fprintf(errFile, "can't seek in %s: %v\n", path, err)
 					return nil
 				}
-				handleJar(path, f, sz)
+				wg.Add(1)
+				defer wg.Done()
+				go handleJar(path, f, sz, &wg)
 			default:
 				return nil
 			}
 			return nil
 		})
 	}
-
+	wg.Wait()
 	if !quiet {
 		fmt.Println("\nScan finished")
 	}
