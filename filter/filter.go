@@ -230,4 +230,7 @@ var vulnVersions = map[string]FileInfo{
 		"log4j 1.2.13-1.2.14", "SocketNode.class", CVE_2019_17571},
 	"287c1d40f2a4bc0055b32b45f12f01bdc2a27379ec33fe13a084bf69a1f4c6e1": FileInfo{
 		"log4j 1.2.15.v201012070815", "SocketNode.class", CVE_2019_17571},
+
+	"1ac1e0ce33feca95834596faceb3a5b042b2a0c4d612c0e6f5045068bab89cd2": FileInfo{
+		"log4j 2.17.0", "DataSourceConnectionSource.class", CVE_2021_44832},
 }
