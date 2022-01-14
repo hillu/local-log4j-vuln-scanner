@@ -16,6 +16,7 @@ import (
 
 var logFile = os.Stdout
 var errFile = os.Stderr
+var deletefiles []string
 
 func handleJar(path string, ra io.ReaderAt, sz int64) {
 	if verbose {
@@ -71,9 +72,25 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 			if info := filter.IsVulnerableClass(buf.Bytes(), file.Name, vulns); info != nil {
 				fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s %s %s\n",
 					path, file.Name, info.Filename, info.Version, info.Vulnerabilities&vulns)
+				if del {
+					mkDelFileSlice(path)
+				}
 				continue
 			}
 		}
+	}
+}
+
+func mkDelFileSlice(path string) {
+	warJar := strings.Split(string(path), "::")
+	exists := false
+	for _, file := range deletefiles {
+		if file == warJar[0] {
+			exists = true
+		}
+	}
+	if !exists {
+		deletefiles = append(deletefiles, warJar[0])
 	}
 }
 
@@ -105,6 +122,7 @@ var vulns filter.Vulnerabilities
 var ignoreVulns filter.Vulnerabilities = filter.CVE_2021_45046 | filter.CVE_2021_44832
 var ignoreV1 bool
 var network bool
+var del bool
 
 func main() {
 	flag.Var(&excludes, "exclude", "paths to exclude (can be used multiple times)")
@@ -114,6 +132,7 @@ func main() {
 	flag.BoolVar(&ignoreV1, "ignore-v1", false, "ignore log4j 1.x versions")
 	flag.Var(&ignoreVulns, "ignore-vulns", "ignore vulnerabilities")
 	flag.BoolVar(&network, "scan-network", false, "search network filesystems")
+	flag.BoolVar(&del, "del", false, "delete vulnerable files")
 
 	flag.Parse()
 
@@ -195,7 +214,18 @@ func main() {
 			return nil
 		})
 	}
+	if del {
+		for _, file := range deletefiles {
+			// fmt.Println("Trying to delete: " + file)
+			err := os.Remove(file)
+			if err != nil {
+				fmt.Println("Got error trying to delete file: " + err.Error())
+			} else {
+				fmt.Println(file + " deleted.")
+			}
+		}
 
+	}
 	if !quiet {
 		fmt.Println("\nScan finished")
 	}
