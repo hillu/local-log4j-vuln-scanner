@@ -3,11 +3,6 @@
 ![logo](logo.png)
 
 
-Forked from https://github.com/hillu/local-log4j-vuln-scanner.
-Only change by me is added "-del" swithc in scanner (for just deleting vulnerable files)
-
-
-
 (Written in Go because, you know, "write once, run anywhere.")
 
 This is a simple tool that can be used to find vulnerable instances of
