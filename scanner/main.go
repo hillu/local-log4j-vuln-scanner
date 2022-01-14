@@ -72,12 +72,25 @@ func handleJar(path string, ra io.ReaderAt, sz int64) {
 			if info := filter.IsVulnerableClass(buf.Bytes(), file.Name, vulns); info != nil {
 				fmt.Fprintf(logFile, "indicator for vulnerable component found in %s (%s): %s %s %s\n",
 					path, file.Name, info.Filename, info.Version, info.Vulnerabilities&vulns)
-				warJar := strings.Split(string(path), "::")
-				// fmt.Println("Henrik test: " + warJar[0])
-				deletefiles = append(deletefiles, warJar[0])
+				if del {
+					mkDelFileSlice(path)
+				}
 				continue
 			}
 		}
+	}
+}
+
+func mkDelFileSlice(path string) {
+	warJar := strings.Split(string(path), "::")
+	exists := false
+	for _, file := range deletefiles {
+		if file == warJar[0] {
+			exists = true
+		}
+	}
+	if !exists {
+		deletefiles = append(deletefiles, warJar[0])
 	}
 }
 
