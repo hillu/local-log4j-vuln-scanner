@@ -46,6 +46,14 @@ func IsVulnerableClass(buf []byte, filename string, v Vulnerabilities) *FileInfo
 		}
 	}
 
+	if v&CVE_2022_23307 != 0  &&
+		strings.Contains(strings.ToLower(filepath.Base(filename)), "chainsaw/main.") {
+		return &FileInfo{
+			"Chainsaw Main.class found",
+			filepath.Base(filename), CVE_2022_23307,
+		}
+	}
+
 	return nil
 }
 
@@ -58,6 +66,9 @@ func (v Vulnerabilities) String() string {
 	}
 	if v&CVE_2021_44228 != 0 {
 		tags = append(tags, "CVE-2021-44228")
+	}
+	if v&CVE_2022_23307 != 0 {
+		tags = append(tags, "CVE_2022_23307")
 	}
 	if v&CVE_2021_45105 != 0 {
 		tags = append(tags, "CVE-2021-45105")
@@ -77,6 +88,8 @@ func (v *Vulnerabilities) Set(s string) error {
 		switch strings.Trim(tag, " ") {
 		case "CVE-2019-17571":
 			*v |= CVE_2019_17571
+		case "CVE_2022_23307":
+			*v |= CVE_2022_23307
 		case "CVE-2021-44228":
 			*v |= CVE_2021_44228
 		case "CVE-2021-45105":
@@ -94,13 +107,14 @@ func (v *Vulnerabilities) Set(s string) error {
 }
 
 const (
-	CheckDefaultVulnerabilities Vulnerabilities = CVE_2019_17571 | CVE_2021_44228 | CVE_2021_45046
+	CheckDefaultVulnerabilities Vulnerabilities = CVE_2019_17571 | CVE_2021_44228 | CVE_2021_45046 | CVE_2022_23307
 	CheckAllVulnerabilities     Vulnerabilities = 0xff
 )
 
 const (
 	// v1.x
 	CVE_2019_17571 Vulnerabilities = 1 << iota
+	CVE_2022_23307
 	// v2.x
 	CVE_2021_44228
 	CVE_2021_45105
@@ -233,4 +247,23 @@ var vulnVersions = map[string]FileInfo{
 
 	"1ac1e0ce33feca95834596faceb3a5b042b2a0c4d612c0e6f5045068bab89cd2": FileInfo{
 		"log4j 2.17.0", "DataSourceConnectionSource.class", CVE_2021_44832},
+
+	"fb288e8015a971b16af5ab8d655b22f261276291aec8b1b40fdc2f2cddabd5fa": FileInfo{
+		"log4j 1.2.4-1.2.7", "Main.class", CVE_2022_23307},
+	"2624d58c0bee501cf37b29cf9b12482b9fdc01f6bfdffba51da4f2bfb864b656": FileInfo{
+		"log4j 1.2.8", "Main.class", CVE_2022_23307},
+	"b945ca6f5e31a88d78cc33302e4cfbdbf458560a5413c8918675765f22b4a1e3": FileInfo{
+		"log4j 1.2.9", "Main.class", CVE_2022_23307},
+	"9cb67446ecf998f8d3cc5b883b76f6f415ce2b1a76c05f83e2812317ff874185": FileInfo{
+		"log4j 1.2.11", "Main.class", CVE_2022_23307},
+	"acccc50431f2f155a57d777d4863cb3ca7c7882ac5842d1d2238d703159390d4": FileInfo{
+		"log4j 1.2.12", "Main.class", CVE_2022_23307},
+	"19cd72c17a6063af790198b434ff8cc1837d4537703742834b6c228a03bd2797": FileInfo{
+		"log4j 1.2.13-1.2.14", "Main.class", CVE_2022_23307},
+	"93f4770b0196b28b4a95960bf9057381a394486ddbb998639bccf8c79f7e3bd2": FileInfo{
+		"log4j 1.2.15", "Main.class", CVE_2022_23307},
+	"c224d01478e0a06878395e40ad9c93f8e30dc93c5cffd7c8b2b3909d8e7fef82": FileInfo{
+		"log4j 1.2.16", "Main.class", CVE_2022_23307},
+	"c0c544876e7083f76341ceb2bbb4d5004b10946c1ba8a3aec4b1aebb5e902312": FileInfo{
+		"log4j 1.2.17", "Main.class", CVE_2022_23307},
 }
